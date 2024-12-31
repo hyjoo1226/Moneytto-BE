@@ -46,11 +46,11 @@ async def chat_endpoint(req: ChatRequest):
     assistant_reply = response.choices[0].message.content
     return {"reply": assistant_reply}
 
-
+# fastapi에서 request body의 필드 두 개 message, thread_id가 있을 때, 첫 질문의 경우 message만 입력한다.
+# 그러면 thread_id가 생성되고, 이후로는 thread_id에 해당 값을 입력하면 기존 질문의 값을 기록하고 있다.
 @app.post("/assistant")
 async def assistant_endpoint(req: AssistantRequest):
     assistant = await openai.beta.assistants.retrieve("asst_PvzW81k910BIR30jwmpPN0ce")
-
     if req.thread_id:
         # We have an existing thread, append user message
         await openai.beta.threads.messages.create(
