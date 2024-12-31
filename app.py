@@ -49,7 +49,7 @@ async def chat_endpoint(req: ChatRequest):
 
 @app.post("/assistant")
 async def assistant_endpoint(req: AssistantRequest):
-    assistant = await openai.beta.assistants.retrieve("asst_tc4AhtsAjNJnRtpJmy1gjJOE")
+    assistant = await openai.beta.assistants.retrieve("asst_PvzW81k910BIR30jwmpPN0ce")
 
     if req.thread_id:
         # We have an existing thread, append user message
