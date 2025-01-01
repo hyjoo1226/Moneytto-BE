@@ -111,12 +111,10 @@ def get_prompt_for_recommend(choice):
     return updated_prompt2
 
 
-def set_rag_chain_for_type(customer_type, open_ai_key, pinecone_api_key):
+def set_rag_chain_for_type(customer_type, open_ai_key, pc):
     
     # upstage models
     embedding_upstage = UpstageEmbeddings(model="embedding-query")
-    
-    pc = Pinecone(api_key=pinecone_api_key)
     
     pdf_vectorstore = PineconeVectorStore(
         index=pc.Index("index-pdf"), embedding=embedding_upstage
@@ -149,12 +147,10 @@ def set_rag_chain_for_type(customer_type, open_ai_key, pinecone_api_key):
 
 
 
-def set_rag_chain_for_recommend(question, choice, open_ai_key, pinecone_api_key):
+def set_rag_chain_for_recommend(question, choice, open_ai_key, pc):
     
     # upstage models
     embedding_upstage = UpstageEmbeddings(model="embedding-query")
-    
-    pc = Pinecone(api_key=pinecone_api_key)
     
     pdf_vectorstore = PineconeVectorStore(
         index=pc.Index("index-pdf"), embedding=embedding_upstage

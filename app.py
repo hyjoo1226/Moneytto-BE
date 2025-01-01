@@ -8,10 +8,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 
 from module.rag_chain import set_rag_chain_for_type, set_rag_chain_for_recommend
+from pinecone import Pinecone, ServerlessSpec
 
 load_dotenv()
 OPENAI_API_KEY = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
+
+pc = Pinecone(api_key=PINECONE_API_KEY)
+
+# create new index
+indexes = ["index-pdf", "index-pdf"]
+for index_name in indexes:
+    if index_name not in pc.list_indexes().names():
+        pc.create_index(
+            name=index_name,
+            dimension=4096,
+            metric="cosine",
+            spec=ServerlessSpec(cloud="aws", region="us-east-1"),
+        )
 
 app = FastAPI()
 
@@ -48,7 +62,7 @@ class InvestmentTypeRequest(BaseModel):
 @app.post("/investment-type")
 async def investment_type_endpoint(req: InvestmentTypeRequest):
     print(f"Received Investment Type: {req.investmentType}")
-    response = set_rag_chain_for_type(req.investmentType, OPENAI_API_KEY, PINECONE_API_KEY)
+    response = set_rag_chain_for_type(req.investmentType, OPENAI_API_KEY, pc)
     return {"response": response}
     
 
@@ -69,7 +83,7 @@ async def chat_endpoint(req: ChatRequest):
     # result = qa(req.message)
     # return {"result": result["result"]}
     
-    response = set_rag_chain_for_recommend(req.question, req.choice, OPENAI_API_KEY)
+    response = set_rag_chain_for_recommend(req.question, req.choice, pc)
     return {"response": response}
 
     # response = await openai.chat.completions.create(

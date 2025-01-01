@@ -44,6 +44,6 @@ print("Splits:", len(splits))
 
 # 벡터화
 vectorstore = PineconeVectorStore.from_documents(documents=splits, embedding=embedding_upstage,# embedding=OpenAIEmbeddings(api_key=open_ai_key),
-                                                index_name=index_name)
+                                                 index_name=index_name)
 
 print("end>> news vectorstore")
