@@ -34,6 +34,15 @@ class ChatRequest(BaseModel):
     messages: List[ChatMessage]  # Entire conversation for naive mode
 
 
+class InvestmentTypeRequest(BaseModel):
+    investmentType: str
+
+
+@app.post("/investment-type")
+async def investment_type_endpoint(req: InvestmentTypeRequest):
+    print(f"Received Investment Type: {req.investmentType}")
+
+
 @app.post("/chat")
 async def chat_endpoint(req: ChatRequest):
     # Assume the entire conversation (including a system message) is sent by the client.
