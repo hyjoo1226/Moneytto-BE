@@ -113,7 +113,7 @@ def get_prompt_for_recommend(choice):
     return updated_prompt2
 
 
-def set_rag_chain_for_type(customer_type, open_ai_key, pc, chat_history):
+def set_rag_chain_for_type(customer_type, open_ai_key, pc):#, chat_history):
     
     # upstage models
     embedding_upstage = UpstageEmbeddings(model="embedding-query")
@@ -140,7 +140,7 @@ def set_rag_chain_for_type(customer_type, open_ai_key, pc, chat_history):
 
     # 체인을 생성합니다.
     rag_chain = (
-        {"context_pdf": pdf_retriever_compression, "question": RunnablePassthrough(), "chat_history": chat_history} #
+        {"context_pdf": pdf_retriever_compression, "question": RunnablePassthrough()}#, "chat_history": chat_history} #
         | get_prompt_for_type(customer_type)
         | llm
         | StrOutputParser()
@@ -149,7 +149,7 @@ def set_rag_chain_for_type(customer_type, open_ai_key, pc, chat_history):
 
 
 
-def set_rag_chain_for_recommend(question, choice, open_ai_key, pc, chat_history):
+def set_rag_chain_for_recommend(question, choice, open_ai_key, pc):#, chat_history):
     
     # upstage models
     embedding_upstage = UpstageEmbeddings(model="embedding-query")
@@ -189,7 +189,7 @@ def set_rag_chain_for_recommend(question, choice, open_ai_key, pc, chat_history)
 
     # 체인을 생성합니다.
     rag_chain = (
-        {"context_news": news_retriever_compression | format_docs, "context_pdf": pdf_retriever_compression, "question": RunnablePassthrough(), "chat_history": chat_history}
+        {"context_news": news_retriever_compression | format_docs, "context_pdf": pdf_retriever_compression, "question": RunnablePassthrough()}#, "chat_history": chat_history}
         | get_prompt_for_recommend(choice)
         | llm
         | StrOutputParser()

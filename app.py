@@ -64,7 +64,7 @@ class InvestmentTypeRequest(BaseModel):
 @app.post("/investment-type")
 async def investment_type_endpoint(req: InvestmentTypeRequest, msg: ChatRequest):
     print(f"Received Investment Type: {req.investmentType}")
-    response = set_rag_chain_for_type(req.investmentType, OPENAI_API_KEY, pc, msg)
+    response = set_rag_chain_for_type(req.investmentType, OPENAI_API_KEY, pc)#, msg)
     print(response)
     return {"response": response}
     
