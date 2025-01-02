@@ -66,6 +66,7 @@ class InvestmentTypeRequest(BaseModel):
 async def investment_type_endpoint(req: InvestmentTypeRequest, msg: ChatRequest):
     print(f"Received Investment Type: {req.investmentType}")
     response = set_rag_chain_for_type(req.investmentType, OPENAI_API_KEY, pc, msg)
+    print(response)
     return {"response": response}
     
 
@@ -135,3 +136,5 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# langchain_community, sentence
