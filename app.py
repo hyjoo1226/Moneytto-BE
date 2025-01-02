@@ -30,13 +30,10 @@ for index_name in indexes:
             spec=ServerlessSpec(cloud="aws", region="us-east-1"),
         )
 
-# print(pc.list_indexes().names())
-
-
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:1234", "http://localhost:5173"],
+    allow_origins=["http://localhost:1234", "http://localhost:5173", "http://localhost:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
