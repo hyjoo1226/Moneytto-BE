@@ -63,7 +63,9 @@ def get_naver_news_with_kewords(search_keywords, num=20):
 
 
 def generate_search_keywords_with_konlpy(question):           
-    stopwords = ["최근", "구애", "고려", "경제", "트렌드", "전망", "관계", "국가"]
+    stopwords = ["최근", "구애", "고려", "경제", "트렌드", "전망", "관계", "국가",
+                 "관련", "타이밍", "설명", "분석", "매수", "매도", "인하", "상승",
+                 "예측", "종목", "최대", "최소"]
     
     from kiwipiepy import Kiwi
 
@@ -80,7 +82,7 @@ def generate_search_keywords_with_konlpy(question):
         if stopword in nouns:
             nouns.remove(stopword)
     # 중복 제거 및 검색어 조합
-    keywords = set(nouns)  # 중복 제거
+    keywords = set(nouns)  # 중복 제거아 그렇구나. 주식에도 투자할까 하는데 최근 미국과 중국간의 관계는 어떤지 분석해서 최대 수혜를 받을 종목을 알려줄 수 있어?
     search_query = ' '.join(keywords)
     print("생성된 검색어:", search_query)
     
