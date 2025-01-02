@@ -7,6 +7,8 @@ from langchain_upstage import UpstageDocumentParseLoader
 from langchain_upstage import UpstageEmbeddings
 from pinecone import Pinecone, ServerlessSpec
 
+
+
 from module.get_docs import get_naver_news_list, load_indexing_news
 
 load_dotenv()
