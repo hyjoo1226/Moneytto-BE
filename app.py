@@ -18,7 +18,7 @@ PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
 pc = Pinecone(api_key=PINECONE_API_KEY)
 
 # create new index
-indexes = ["index-pdf", "index-pdf"]
+indexes = ["index-pdf", "index-news"]
 for index_name in indexes:
     if index_name not in pc.list_indexes().names():
         pc.create_index(
@@ -29,7 +29,6 @@ for index_name in indexes:
         )
 
 app = FastAPI()
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
