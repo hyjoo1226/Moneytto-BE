@@ -11,9 +11,10 @@ from module.rag_chain import set_rag_chain_for_type, set_rag_chain_for_recommend
 from pinecone import Pinecone, ServerlessSpec
 
 load_dotenv()
-OPENAI_API_KEY = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
 
+# OPENAI_API_KEY = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
 pc = Pinecone(api_key=PINECONE_API_KEY)
 
 # create new index
