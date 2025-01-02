@@ -14,7 +14,7 @@ from langchain_pinecone import PineconeVectorStore
 from langchain_upstage import UpstageEmbeddings
 from pinecone import Pinecone, ServerlessSpec
 
-from module.get_docs import format_docs, load_indexing_news, get_naver_news_with_kewords, get_naver_news_list
+from module.get_docs import format_docs, load_indexing_news, generate_search_keywords_with_konlpy, get_naver_news_list
 
 
 # load_dotenv()
@@ -176,7 +176,7 @@ def set_rag_chain_for_recommend(question, choice, open_ai_key, pc, h_messages):
         index=pc.Index("index-pdf"), embedding=embedding_upstage
     )
     
-    news_list = get_naver_news_list(choice)
+    news_list = get_naver_news_list(question, choice)
     news_docs = load_indexing_news(news_list)
         
     text_splitter = RecursiveCharacterTextSplitter(

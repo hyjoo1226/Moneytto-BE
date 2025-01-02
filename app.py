@@ -130,11 +130,6 @@ async def investment_type_endpoint(req: InvestmentTypeRequest):
             return {"reply": value["messages"][-1]}
 
 
-# @app.post("/send-choice")
-# async def choice_endpoint(req: ChoiceRequest):
-#     print(f"Received choice: {req.choice}")
-
-
 @app.post("/chat")
 async def chat_endpoint(req: MessageRequest):
     global checker, thread_code, chat_history
@@ -148,54 +143,6 @@ async def chat_endpoint(req: MessageRequest):
             state = graph.get_state(config)
             return {"reply": value["messages"][-1]}
         
-#
-# @app.post("/investment-type")
-# async def investment_type_endpoint(req: InvestmentTypeRequest):#, msg: ChatRequest):
-#     print(f"Received Investment Type: {req.investmentType}")
-#     response = set_rag_chain_for_type(req.investmentType, OPENAI_API_KEY, pc)#, msg)
-#     print(response)
-#     return {"reply": response}
-
-# @app.post("/chat")
-# async def chat_endpoint(req: MessageRequest):#, msg: ChatRequest):
-#     response = set_rag_chain_for_recommend(req.question, req.choice, pc)#, msg)
-#     return {"reply": response}
-
-
-# fastapi에서 request body의 필드 두 개 message, thread_id가 있을 때, 첫 질문의 경우 message만 입력한다.
-# 그러면 thread_id가 생성되고, 이후로는 thread_id에 해당 값을 입력하면 기존 질문의 값을 기록하고 있다.
-# @app.post("/assistant")
-# async def assistant_endpoint(req: AssistantRequest):
-#     assistant = await openai.beta.assistants.retrieve("asst_PvzW81k910BIR30jwmpPN0ce")
-#     if req.thread_id:
-#         # We have an existing thread, append user message
-#         await openai.beta.threads.messages.create(
-#             thread_id=req.thread_id, role="user", content=req.message
-#         )
-#         thread_id = req.thread_id
-#     else:
-#         # Create a new thread with user message
-#         thread = await openai.beta.threads.create(
-#             messages=[{"role": "user", "content": req.message}]
-#         )
-#         thread_id = thread.id
-
-#     # Run and wait until complete
-#     await openai.beta.threads.runs.create_and_poll(
-#         thread_id=thread_id, assistant_id=assistant.id
-#     )
-
-#     # Now retrieve messages for this thread
-#     # messages.list returns an async iterator, so let's gather them into a list
-#     all_messages = [
-#         m async for m in openai.beta.threads.messages.list(thread_id=thread_id)
-#     ]
-#     print(all_messages)
-
-#     # The assistant's reply should be the last message with role=assistant
-#     assistant_reply = all_messages[0].content[0].text.value
-
-#     return {"reply": assistant_reply, "thread_id": thread_id}
 
 
 if __name__ == "__main__":
