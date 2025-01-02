@@ -14,8 +14,6 @@ from langchain_pinecone import PineconeVectorStore
 from langchain_upstage import UpstageEmbeddings
 from pinecone import Pinecone, ServerlessSpec
 
-import sys
-
 from get_docs import format_docs, load_indexing_news, get_naver_news_with_kewords
 
 
