@@ -5,10 +5,16 @@ from openai import AsyncOpenAI
 import os
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Optional
+from typing import List, Optional, Annotated
+from typing_extensions import TypedDict
 
 from module.rag_chain import set_rag_chain_for_type, set_rag_chain_for_recommend
 from pinecone import Pinecone, ServerlessSpec
+
+from langchain_core.runnables import RunnableConfig
+from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
+from langgraph.checkpoint.memory import MemorySaver
 
 load_dotenv()
 
@@ -33,7 +39,7 @@ for index_name in indexes:
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:1234", "http://localhost:5173", "http://localhost:8000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -61,41 +67,91 @@ class MessageRequest(BaseModel):
 class InvestmentTypeRequest(BaseModel):
     investmentType: str
 
+#
 
+memory = MemorySaver()
+checker = False
+thread_code = 0
 
-@app.post("/investment-type")
-async def investment_type_endpoint(req: InvestmentTypeRequest):#, msg: ChatRequest):
-    print(f"Received Investment Type: {req.investmentType}")
-    response = set_rag_chain_for_type(req.investmentType, OPENAI_API_KEY, pc)#, msg)
-    print(response)
-    return {"reply": response}
+class State(TypedDict):
+    messages: Annotated[list, add_messages]
     
 
+def chatbot(state: State):
+    global checker
+    if checker:
+        # print(state['messages'])
+        user_invest = state['messages'][-1].content
+        # print(user_invest)
+        response = set_rag_chain_for_type(user_invest, OPENAI_API_KEY, pc)
+        # print(response)
+        state['messages'].append({"role": "assistant", "content": response})
+        checker = False
+        return {"messages": [response]}
+    else:
+        question = state['messages'][-1].content[0]
+        choice = state['messages'][-1].content[1]
+        response = set_rag_chain_for_recommend(question, choice, OPENAI_API_KEY,pc, state['messages'])
+        state['messages'].append({"role": "assistant", "content": response})
+        return {"messages": [response]}
+    
+    
+graph_builder = StateGraph(State)
+
+graph_builder.add_node("chatbot", chatbot)
+graph_builder.add_edge(START, "chatbot")
+graph_builder.add_edge("chatbot", END)
+
+graph = graph_builder.compile(checkpointer=memory)
+
+chat_history = ""
+@app.post("/investment-type")
+async def investment_type_endpoint(req: InvestmentTypeRequest):
+    global checker, chat_history, thread_code
+    chat_history = ""
+    print(f"Received Investment Type: {req.investmentType}")
+    checker = True
+    chat_history += req.investmentType + "\n"
+    
+    thread_code += 1
+    print("thread_code:", thread_code)
+    
+    config = RunnableConfig(
+        recursion_limit=20,
+        configurable={"thread_id": str(thread_code)}
+    )
+    
+    for event in graph.stream({"messages": [("user", req.investmentType)]}, config=config):
+        for value in event.values():
+            state = graph.get_state(config)
+            return {"reply": value["messages"][-1]}
 
 @app.post("/chat")
-async def chat_endpoint(req: MessageRequest):#, msg: ChatRequest):
-    # Assume the entire conversation (including a system message) is sent by the client.
-    # Example: messages might look like:
-    # [{"role":"system","content":"You are a helpful assistant."}, {"role":"user","content":"Hello"}]
-    
-    # qa = RetrievalQA.from_chain_type(
-    #     llm=chat_upstage,
-    #     chain_type="stuff",
-    #     retriever=pinecone_retriever,
-    #     return_source_document=True,
-    # )
-    
-    # result = qa(req.message)
-    # return {"result": result["result"]}
-    
-    response = set_rag_chain_for_recommend(req.question, req.choice, pc)#, msg)
-    return {"reply": response}
+async def chat_endpoint(req: MessageRequest):
+    global checker, thread_code, chat_history
+    config = RunnableConfig(
+        recursion_limit=20,
+        configurable={"thread_id": str(thread_code)}
+    )
+    print("thread_code:", thread_code)
+    for event in graph.stream({"messages": [("user", (req.question, req.choice))]}, config=config):
+        for value in event.values():
+            state = graph.get_state(config)
+            return {"reply": value["messages"][-1]}
+        
+#
+# @app.post("/investment-type")
+# async def investment_type_endpoint(req: InvestmentTypeRequest):#, msg: ChatRequest):
+#     print(f"Received Investment Type: {req.investmentType}")
+#     response = set_rag_chain_for_type(req.investmentType, OPENAI_API_KEY, pc)#, msg)
+#     print(response)
+#     return {"reply": response}
 
-    # response = await openai.chat.completions.create(
-    #     model="gpt-4o-mini", messages=req.messages
-    # )
-    # assistant_reply = response.choices[0].message.content
-    # return {"reply": assistant_reply}
+# @app.post("/chat")
+# async def chat_endpoint(req: MessageRequest):#, msg: ChatRequest):
+#     response = set_rag_chain_for_recommend(req.question, req.choice, pc)#, msg)
+#     return {"reply": response}
+
 
 # fastapi에서 request body의 필드 두 개 message, thread_id가 있을 때, 첫 질문의 경우 message만 입력한다.
 # 그러면 thread_id가 생성되고, 이후로는 thread_id에 해당 값을 입력하면 기존 질문의 값을 기록하고 있다.
