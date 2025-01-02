@@ -200,7 +200,7 @@ def set_rag_chain_for_recommend(question, choice, open_ai_key, pc, h_messages):
     # 뉴스에 포함되어 있는 정보를 검색하고 생성합니다.
     news_retriever = news_vectorstore.as_retriever(
         search_type= 'mmr', # default : similarity(유사도) / mmr 알고리즘
-        search_kwargs={"k": 3} # 쿼리와 관련된 chunk를 3개 검색하기 (default : 4)
+        search_kwargs={"k": 10} # 쿼리와 관련된 chunk를 3개 검색하기 (default : 4)
     )
 
     # ReRanker: CrossEncoder
