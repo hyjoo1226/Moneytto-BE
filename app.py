@@ -62,7 +62,7 @@ class InvestmentTypeRequest(BaseModel):
 
 
 @app.post("/investment-type")
-async def investment_type_endpoint(req: InvestmentTypeRequest, msg: ChatRequest):
+async def investment_type_endpoint(req: InvestmentTypeRequest):#, msg: ChatRequest):
     print(f"Received Investment Type: {req.investmentType}")
     response = set_rag_chain_for_type(req.investmentType, OPENAI_API_KEY, pc)#, msg)
     print(response)
@@ -71,7 +71,7 @@ async def investment_type_endpoint(req: InvestmentTypeRequest, msg: ChatRequest)
 
 
 @app.post("/chat")
-async def chat_endpoint(req: MessageRequest, msg: ChatRequest):
+async def chat_endpoint(req: MessageRequest):#, msg: ChatRequest):
     # Assume the entire conversation (including a system message) is sent by the client.
     # Example: messages might look like:
     # [{"role":"system","content":"You are a helpful assistant."}, {"role":"user","content":"Hello"}]
