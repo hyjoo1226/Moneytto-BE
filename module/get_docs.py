@@ -31,18 +31,17 @@ def load_indexing_news(news_list):
             )
             docs.extend(loader.load())
         except Exception as e:
-            print(f"Failed to load content from {url}: {e}")
+            print(f"Invalid news format")
     return docs
 
 
 def get_naver_news_with_kewords(search_keywords, num=20):
-    
     CLIENT_ID = os.environ.get("CLIENT_ID")
     CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
     
     encText = urllib.parse.quote(search_keywords)
     url = "https://openapi.naver.com/v1/search/news?query=" + encText + f"&display={num}" # JSON 결과
-    # url = "https://openapi.naver.com/v1/search/news.xml?query=" + encText # XML 결과
+    
     request = urllib.request.Request(url)
     request.add_header("X-Naver-Client-Id",CLIENT_ID)
     request.add_header("X-Naver-Client-Secret", CLIENT_SECRET)
@@ -56,7 +55,6 @@ def get_naver_news_with_kewords(search_keywords, num=20):
         news_list = []
         for item in response_json['items']:
             news_list.append(item['link'])
-        print("검색된 뉴스: ", news_list)
         return news_list
     else:
         print("Error Code:" + rescode)
@@ -64,28 +62,14 @@ def get_naver_news_with_kewords(search_keywords, num=20):
 
 
 
-def generate_search_keywords_with_konlpy(question):
-    
-    # stopwords = ["아", "위주", "주", "현재", "최근", "집중", "가지", "성향", "걱정", "때문", "구애", "상품", "대한", "관한", "관해", "고려", "대해", "구입", "사려", "종목", "펀드", "분석", "해", "사고", "말", "투자가", "이번", "상황", "휴" ,"어" ,"나", "때", "게", "것", "우리", "저희", "따라", "의해", "을", "를", "에" ,"의" ,"가", "으로", "로", "에게" ,"고려하다", "뿐이다" ,"의거하여" "근거하여", "입각하여", "기준으로", "예하면" ,"예를 들면" ,"예를 들자면",
-    #     "저", "소인", "소생", "저희", "지말고", "하지마", "하지마라", "다른" , "전", "후", "물론" ,"또한" ,"그리고" ,"비길수" ,"없다" ,"해서는" ,"안된다", "뿐만", "아니라", "만이", "아니다", "만은", "아니다", "막론하고", "관계없이", "그치지 않다", "그러나" ,"그런데",
-    #     "하지만" ,"비록", "불문하고" ,"쪽으로", "이용하여", "부터",  "할", "생각이다", "하려고하다", "그렇게", "하지만", "일때", "할때", "앞에서", "중에서", "로써", "까지", "지금" ,"생각하" ,"그러", "속" ,"하나" ,"모르","데", "자신" ,"안", "어떤", "경우", "고려하" ]
-
-    # # NNG, NNP
-    # okt = Okt()
-    # # 명사 추출
-    # nouns = okt.nouns(question)
-    # for stopword in stopwords:
-    #     if stopword in nouns:
-    #         nouns.remove(stopword)
-            
-    stopwords = ["최근", "구애", "고려", "경제", "트렌드", "전망"]
+def generate_search_keywords_with_konlpy(question):           
+    stopwords = ["최근", "구애", "고려", "경제", "트렌드", "전망", "관계", "국가"]
     
     from kiwipiepy import Kiwi
 
     # Kiwi 객체 생성
     kiwi = Kiwi()
     result = kiwi.analyze(question)
-    print(">>>",result)
     
     nouns = []
     for token, pos, _, _ in result[0][0]:
@@ -100,12 +84,11 @@ def generate_search_keywords_with_konlpy(question):
     search_query = ' '.join(keywords)
     print("생성된 검색어:", search_query)
     
-    
     return search_query
     
 def get_naver_news_list(question, choice):
     economic_news_list = []
-    keywords = ["정치 경제 ", "금리 전망 ", "해외 투자 ", "대출 ", "환율 ", "주요 지수 ", ""]
+    keywords = ["정치 경제 ", "금리  ", "해외 투자 ", "대출 ", "주요 지수 ", ""]
     keywords += generate_search_keywords_with_konlpy(question)
     for keyword in keywords:
         try:

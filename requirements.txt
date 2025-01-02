@@ -30,3 +30,5 @@ langchain_pinecone == 0.2.0
 pinecone == 5.3.1
 langgraph == 0.2.59
 google-search-results
+kiwipiepy
+langchain_community

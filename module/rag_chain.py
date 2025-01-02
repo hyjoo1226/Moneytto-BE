@@ -14,17 +14,8 @@ from langchain_pinecone import PineconeVectorStore
 from langchain_upstage import UpstageEmbeddings
 from pinecone import Pinecone, ServerlessSpec
 
-from module.get_docs import format_docs, load_indexing_news, generate_search_keywords_with_konlpy, get_naver_news_list
+from module.get_docs import format_docs, load_indexing_news, get_naver_news_list
 
-
-# load_dotenv()
-# open_ai_key = os.environ.get("open_ai_key")
-
-# # upstage models
-# embedding_upstage = UpstageEmbeddings(model="embedding-query")
-
-# pinecone_api_key = os.environ.get("PINECONE_API_KEY")
-# pc = Pinecone(api_key=pinecone_api_key)
 
 def get_prompt_for_type(customer_type):
     first_template = f"""
@@ -54,14 +45,8 @@ def get_prompt_for_type(customer_type):
     ...
 
     """
-    # 이전 메시지: {chat_history}
 
     # 새로운 PromptTemplate 생성
-    # prompt_template_after_survey = PromptTemplate(
-    #     input_variables=["context_pdf", "question"],#, "chat_history"],  # 변수 그대로 유지
-    #     template=first_template  # 새 템플릿 적용
-    # )
-
     prompt_template_after_survey = PromptTemplate(
         input_variables=["context_pdf", "question", "chat_history"],  # 변수 그대로 유지
         template=first_template  # 새 템플릿 적용
@@ -104,12 +89,7 @@ def get_prompt_for_recommend(choice):
     - 종목 추천 이유:
 
     """
-    # 
-    # 새로운 PromptTemplate 생성
-    # updated_prompt_template = PromptTemplate(
-    #     input_variables=["context_pdf", "context_news", "question"],#, "chat_history"],  # 변수 그대로 유지
-    #     template=recommend_template  # 새 템플릿 적용
-    # )
+
     updated_prompt_template = PromptTemplate(
         input_variables=["context_pdf", "context_news", "question", "chat_history"],  # 변수 그대로 유지
         template=recommend_template  # 새 템플릿 적용
@@ -147,14 +127,6 @@ def set_rag_chain_for_type(customer_type, open_ai_key, pc):#, chat_history):
 
     llm = ChatOpenAI(model_name="gpt-4o-mini", temperature=0,
                     openai_api_key=open_ai_key)
-
-    # 체인을 생성합니다.
-    # rag_chain = (
-    #     {"context_pdf": pdf_retriever_compression, "question": RunnablePassthrough()}#, "chat_history": chat_history} #
-    #     | get_prompt_for_type(customer_type)
-    #     | llm
-    #     | StrOutputParser()
-    # )
     
     rag_chain = (
         {"chat_history": RunnableLambda(lambda x: customer_type), "context_pdf": pdf_retriever_compression, "question": RunnablePassthrough()} #
@@ -216,18 +188,9 @@ def set_rag_chain_for_recommend(question, choice, open_ai_key, pc, h_messages):
 
     llm = ChatOpenAI(model_name="gpt-4o-mini", temperature=0,
                     openai_api_key=open_ai_key)
-
-    # # 체인을 생성합니다.
-    # rag_chain = (
-    #     {"context_news": news_retriever_compression | format_docs, "context_pdf": pdf_retriever_compression, "question": RunnablePassthrough()}#, "chat_history": chat_history}
-    #     | get_prompt_for_recommend(choice)
-    #     | llm
-    #     | StrOutputParser()
-    # )
     
     chat_history = ""
     for msg in h_messages:
-        # print(msg)
         if isinstance(msg.content, list):
             chat_history += msg.content[0] + "\n" + msg.content[1] + "\n"
         else:

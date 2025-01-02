@@ -28,7 +28,7 @@ if index_name not in pc.list_indexes().names():
         spec=ServerlessSpec(cloud="aws", region="us-east-1"),
     )
 
-print("start")
+print("start ... pdf vectorize")
 document_parse_loader = UpstageDocumentParseLoader(
     pdf_path,
     output_format='html',  # 결과물 형태 : HTML
@@ -37,16 +37,14 @@ document_parse_loader = UpstageDocumentParseLoader(
 docs = document_parse_loader.load()
 
 # Split the document into chunks
-
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=1000,
     chunk_overlap=100)
 
 # Embed the splits
-
 splits = text_splitter.split_documents(docs)
 
 PineconeVectorStore.from_documents(
     splits, embedding_upstage, index_name=index_name
 )
-print("end")
+print("end ... pdf vectorized")
