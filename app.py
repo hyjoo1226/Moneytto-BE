@@ -86,7 +86,7 @@ async def chat_endpoint(req: MessageRequest, msg: ChatRequest):
     # result = qa(req.message)
     # return {"result": result["result"]}
     
-    response = set_rag_chain_for_recommend(req.question, req.choice, pc, msg)
+    response = set_rag_chain_for_recommend(req.question, req.choice, pc)#, msg)
     return {"response": response}
 
     # response = await openai.chat.completions.create(
