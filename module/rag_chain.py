@@ -14,7 +14,7 @@ from langchain_pinecone import PineconeVectorStore
 from langchain_upstage import UpstageEmbeddings
 from pinecone import Pinecone, ServerlessSpec
 
-from module.get_docs import format_docs, load_indexing_news, get_naver_news_with_kewords
+from module.get_docs import format_docs, load_indexing_news, get_naver_news_with_kewords, get_naver_news_list
 
 
 # load_dotenv()
@@ -176,9 +176,21 @@ def set_rag_chain_for_recommend(question, choice, open_ai_key, pc, h_messages):
         index=pc.Index("index-pdf"), embedding=embedding_upstage
     )
     
-    news_vectorstore = PineconeVectorStore(
-        index=pc.Index("index-news"), embedding=embedding_upstage
-    )
+    news_list = get_naver_news_list(choice)
+    news_docs = load_indexing_news(news_list)
+        
+    text_splitter = RecursiveCharacterTextSplitter(
+                        chunk_size=1000,
+                        chunk_overlap=100
+                    )
+
+    # Embed the splits
+    splits = text_splitter.split_documents(news_docs)
+    print("Splits:", len(splits))
+
+    # 벡터화
+    news_vectorstore = PineconeVectorStore.from_documents(documents=splits, embedding=embedding_upstage,# embedding=OpenAIEmbeddings(api_key=open_ai_key),
+                                                    index_name="index-news")
     
     pdf_retriever = pdf_vectorstore.as_retriever(
         search_type= 'mmr', # default : similarity(유사도) / mmr 알고리즘
