@@ -50,10 +50,12 @@ class AssistantRequest(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    # messages: List[ChatMessage]  # Entire conversation for naive mode
+    messages: List[ChatMessage]  # Entire conversation for naive mode
+    
+
+class MessageRequest(BaseModel):
     question: str
     choice: str
-
 
 class InvestmentTypeRequest(BaseModel):
     investmentType: str
@@ -61,15 +63,15 @@ class InvestmentTypeRequest(BaseModel):
 
 
 @app.post("/investment-type")
-async def investment_type_endpoint(req: InvestmentTypeRequest):
+async def investment_type_endpoint(req: InvestmentTypeRequest, msg: ChatRequest):
     print(f"Received Investment Type: {req.investmentType}")
-    response = set_rag_chain_for_type(req.investmentType, OPENAI_API_KEY, pc)
+    response = set_rag_chain_for_type(req.investmentType, OPENAI_API_KEY, pc, msg)
     return {"response": response}
     
 
 
 @app.post("/chat")
-async def chat_endpoint(req: ChatRequest):
+async def chat_endpoint(req: MessageRequest, msg: ChatRequest):
     # Assume the entire conversation (including a system message) is sent by the client.
     # Example: messages might look like:
     # [{"role":"system","content":"You are a helpful assistant."}, {"role":"user","content":"Hello"}]
@@ -84,7 +86,7 @@ async def chat_endpoint(req: ChatRequest):
     # result = qa(req.message)
     # return {"result": result["result"]}
     
-    response = set_rag_chain_for_recommend(req.question, req.choice, pc)
+    response = set_rag_chain_for_recommend(req.question, req.choice, pc, msg)
     return {"response": response}
 
     # response = await openai.chat.completions.create(

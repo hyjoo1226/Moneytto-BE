@@ -41,6 +41,7 @@ def get_prompt_for_type(customer_type):
     5. 사용자의 개인정보 및 민감정보(주민등록번호, 카드정보 등)가 질문에 들어오면 '개인의 민감한 정보를 입력하지 마세요!'라는 경고를 띄우고 답변 생성하는 것을 멈춥니다.
     6. 답변 형식에 맞추세요.
 
+    이전 메시지: {chat_history}
     질문: {question}
     참조문서: {context_pdf}
     답변 형식:
@@ -56,7 +57,7 @@ def get_prompt_for_type(customer_type):
 
     # 새로운 PromptTemplate 생성
     prompt_template_after_survey = PromptTemplate(
-        input_variables=["context_pdf", "question"],  # 변수 그대로 유지
+        input_variables=["context_pdf", "question", "chat_history"],  # 변수 그대로 유지
         template=first_template  # 새 템플릿 적용
     )
 
@@ -86,6 +87,7 @@ def get_prompt_for_recommend(choice):
     6. 답변 형식에 맞추세요.
 
 
+    이전 메시지: {chat_history}
     질문: {question}
     참조문서: {context_pdf}
     참조뉴스: {context_news}
@@ -99,7 +101,7 @@ def get_prompt_for_recommend(choice):
 
     # 새로운 PromptTemplate 생성
     updated_prompt_template = PromptTemplate(
-        input_variables=["context_pdf", "context_news", "question"],  # 변수 그대로 유지
+        input_variables=["context_pdf", "context_news", "question", "chat_history"],  # 변수 그대로 유지
         template=recommend_template  # 새 템플릿 적용
     )
 
@@ -111,7 +113,7 @@ def get_prompt_for_recommend(choice):
     return updated_prompt2
 
 
-def set_rag_chain_for_type(customer_type, open_ai_key, pc):
+def set_rag_chain_for_type(customer_type, open_ai_key, pc, chat_history):
     
     # upstage models
     embedding_upstage = UpstageEmbeddings(model="embedding-query")
@@ -138,7 +140,7 @@ def set_rag_chain_for_type(customer_type, open_ai_key, pc):
 
     # 체인을 생성합니다.
     rag_chain = (
-        {"context_pdf": pdf_retriever_compression, "question": RunnablePassthrough()} #
+        {"context_pdf": pdf_retriever_compression, "question": RunnablePassthrough(), "chat_history": chat_history} #
         | get_prompt_for_type(customer_type)
         | llm
         | StrOutputParser()
@@ -147,7 +149,7 @@ def set_rag_chain_for_type(customer_type, open_ai_key, pc):
 
 
 
-def set_rag_chain_for_recommend(question, choice, open_ai_key, pc):
+def set_rag_chain_for_recommend(question, choice, open_ai_key, pc, chat_history):
     
     # upstage models
     embedding_upstage = UpstageEmbeddings(model="embedding-query")
@@ -187,7 +189,7 @@ def set_rag_chain_for_recommend(question, choice, open_ai_key, pc):
 
     # 체인을 생성합니다.
     rag_chain = (
-        {"context_news": news_retriever_compression | format_docs, "context_pdf": pdf_retriever_compression, "question": RunnablePassthrough()}
+        {"context_news": news_retriever_compression | format_docs, "context_pdf": pdf_retriever_compression, "question": RunnablePassthrough(), "chat_history": chat_history}
         | get_prompt_for_recommend(choice)
         | llm
         | StrOutputParser()
