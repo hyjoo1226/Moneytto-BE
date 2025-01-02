@@ -17,6 +17,8 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
 pc = Pinecone(api_key=PINECONE_API_KEY)
 
+print(pc.list_indexes().names())
+
 # create new index
 indexes = ["index-pdf", "index-news"]
 for index_name in indexes:
@@ -27,6 +29,9 @@ for index_name in indexes:
             metric="cosine",
             spec=ServerlessSpec(cloud="aws", region="us-east-1"),
         )
+
+print(pc.list_indexes().names())
+
 
 app = FastAPI()
 app.add_middleware(
